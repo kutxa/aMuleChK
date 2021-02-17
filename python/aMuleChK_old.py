@@ -1,0 +1,141 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+######### VARIABLES DE USUARIO ###############
+# path 
+amulecmd='/usr/bin/amulecmd'
+####### 	IMPORTACIONES ####################
+import sys, os
+from subprocess import Popen, PIPE
+import re
+from tkinter import *
+import ttk
+from time import sleep
+############### FUNCIONES      ###############
+def activo():
+	comando='ps -C amuled'
+	salida = os.popen(comando).read()
+	salida=salida.decode()
+	lista=re.split('\n',salida)[1:]
+	if len(lista)==1:
+		return False
+	else:
+		return True
+
+def situacion():
+	comando='amulecmd -c status'
+	salida = os.popen(comando).read()
+	salida=salida.decode()
+	lista=re.split('\n > ',salida)[1:]
+	lista[-1]=re.split('\n',lista[-1])[0]
+	return (lista[0], lista[1],lista[2],lista[3])
+
+###########   VENTANA DE APLICACION ##########
+class Aplicacion():
+	def __init__(self):
+		### Funciones de la ventana principal
+		def conectar(event):
+			if not activo():
+				comando='amuled -f'
+				salida = os.popen(comando).read()
+			sleep(4)
+			dibujar()
+		def dibujar():
+			#compruebo si el amuled está activo y muestro los datos
+			if activo():
+				#obtengo los datos de la situación del amule y los cargo en las etiquetas
+				Datos=situacion()
+				#etiqueta del servidor
+				serv=re.split(' ',Datos[0])[1:]
+				self.txtServidor.set(serv[2].strip()+' ' + serv[5].strip())
+				#etiqueta de Kademlia
+				if (Datos[1])[16:18].strip()=='fi':
+					self.txtKademlia.set('Red Kademlia tras cortafuegos')
+				else:
+					self.txtKademlia.set((Datos[1])[16:18].strip())
+				#etiqueta de bajada
+				self.txtBajada.set((Datos[2])[9:].strip())
+				#etiqueta de subida
+				self.txtSubida.set((Datos[3])[8:].strip())
+				#activo el boton de ver descargas
+				self.descargas['state']='normal' 
+			#si no está activo doy mensaje de error, utilizo la etiqueta del servidor
+			else:
+				self.txtServidor.set("!aMuled NO está activo¡")
+		### Dibujando la ventana principal
+		self.principal=Tk()
+		self.principal.geometry('400x220') # anchura x altura
+		self.principal.configure(bg = 'white') #color de fondo
+		self.principal.title('AmuleChK')
+		self.principal.resizable(0,0) #no se puede cambiar el tamaño de la ventana
+		#logotipo aMule
+		logo='''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'''
+		logo=PhotoImage(data=logo)
+		self.logo=ttk.Label(self.principal,borderwidth=0,image=logo)
+		self.logo.image=logo
+		self.logo.bind('<Button-1>',conectar)
+		self.logo.place(x=5,y=5, height=200, width=200)
+		#defino las variableS para cambiar el contenido de la etiquetas
+		self.txtServidor = StringVar()
+		self.txtKademlia = StringVar()
+		self.txtBajada = StringVar()
+		self.txtSubida = StringVar()
+		#dibujo las etiquetas y las coloco en la ventana
+		self.servidor=Label(self.principal,fg='Black',bg='White',textvariable=self.txtServidor)
+		self.servidor.place(x=210,y=40)
+		self.kad=Label(self.principal,fg='Black',bg='White',textvariable=self.txtKademlia)
+		self.kad.place(x=210,y=60)
+		self.bajada=Label(self.principal,fg='Black',bg='White',textvariable=self.txtBajada)
+		self.bajada.place(x=210,y=80)
+		self.subida=Label(self.principal,fg='Black',bg='White',textvariable=self.txtSubida)
+		self.subida.place(x=210,y=100)
+		#boton salir
+		self.salir=ttk.Button(self.principal, text='Salir',padding=(5,5), command=quit)
+		self.salir.place(x=300,y=150)
+		#boton descargas actuales
+		self.descargas=ttk.Button(self.principal, text='Descargas',padding=(5,5), state=DISABLED,command=self.desc_activas)
+		self.descargas.place(x=200,y=150)
+		
+		###Obtengo los datos y muestro las etiquetas
+		dibujar()
+		self.principal.mainloop()
+	def desc_activas(self):
+		#Funciones de la ventana de descargas
+		def detalle():
+			comando="amulecmd -c 'show dl'"
+			salida = os.popen(comando).read()
+			#salida=salida.decode()
+			lista=re.split('\n > ',salida)[1:]
+			lista[-1]=re.split('\n',lista[-1])[0]
+			texto=""
+			for ind,line in enumerate(lista):
+				if ind % 2 == 0:
+					texto=texto + (re.split(" ",line,1)[1])[:28].strip() + "	"
+				else :
+					texto = texto + (re.split(" ",line,1)[1])[1:6].strip() + "	"
+					if (re.split(" ",line,1)[1])[29:30].strip() == "W":
+						texto= texto + "Esperando" + chr(13)
+					else:
+						texto= texto + "Descargando" + chr(13)
+			self.activas.txtActivas.set(texto)
+		### Dibujando la ventana de descargas activas
+		self.activas=Toplevel()
+		self.activas.geometry('400x220') # anchura x altura
+		self.activas.configure(bg = 'white') #color de fondo
+		self.activas.title('Descargas activas')
+		self.activas.resizable(0,0) #no se puede cambiar el tamaño de la ventana
+		#cuadro de texto para mostrar las descargas activas
+		self.activas.txtActivas= StringVar()
+		self.descargasActivas=Message(self.activas,fg='Black',bg='White', textvariable=self.activas.txtActivas,width=380)
+		self.descargasActivas.place(x=20,y=20)
+		#boton salir de descargas activas
+		self.salirActivas=ttk.Button(self.activas, text='Salir',padding=(5,5), command=self.activas.destroy)
+		self.salirActivas.place(x=300,y=150)
+		#obtengo los datos y dibujo el cuadro de texto
+		detalle()
+##########   PRINCIPAL  ######################
+def main():
+	#abrir la aplicación
+	aMuleChK = Aplicacion()
+	return 0
+if __name__ == '__main__':
+	main()

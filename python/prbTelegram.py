@@ -38,5 +38,14 @@ def name_script(message):
     name = sys.argv[0]
     bot.send_message(message.chat.id, "Running: {}".format(name));
 
+@bot.message_handler(func=lambda message: message.text.lower() == 'usb' and message.chat.id == owner)
+def usbList(message):
+	command = 'lsusb'
+	txtExit = os.popen(command).read()
+	listUsb = re.split('\n',txtExit)
+	exitUsb = ""
+	for usb in listUsb:
+		exitUsb += "{}\n".format(usb[33:])
+	bot.send_message(message.chat.id, "USB connections: \n{}".format(exitUsb));
 
 bot.polling()

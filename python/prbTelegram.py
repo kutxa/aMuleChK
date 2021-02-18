@@ -1,14 +1,14 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 import telebot
-bot = telebot.TeleBot("");
+bot = telebot.TeleBot("<TOKEN>");
 
 import requests
 import os
 import time
 import sys
 
-owner = 
+owner = <ID>
 
 @bot.message_handler(func=lambda message: message.text.lower() == 'id')
 def saludar(message):

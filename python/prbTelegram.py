@@ -1,14 +1,16 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 import telebot
-bot = telebot.TeleBot("<TOKEN>");
+bot = telebot.TeleBot("1460282614:AAF9GPKkPvhp0BD88BwuaMk_moYQbff9Zg4");
 
 import requests
 import os
 import time
 import sys
+from subprocess import Popen, PIPE
+import re
 
-owner = <ID>
+owner = 1657793959
 
 @bot.message_handler(func=lambda message: message.text.lower() == 'id')
 def saludar(message):
@@ -47,5 +49,17 @@ def usbList(message):
 	for usb in listUsb:
 		exitUsb += "{}\n".format(usb[33:])
 	bot.send_message(message.chat.id, "USB connections: \n{}".format(exitUsb));
+	
+@bot.message_handler(func=lambda message: message.text[:len("exec")].lower() == 'exec' and message.chat.id == owner)
+def command_long_text(message):
+    cid = message.chat.id
+    bot.send_message(cid, "Ejecutando: "+ message.text[len("exec"):])
+    bot.send_chat_action(cid, 'typing') # show the bot "typing" (max. 5 secs)
+    time.sleep(2)
+    f = os.popen(message.text[len("exec"):])
+    result = f.read()
+    bot.send_message(cid, "Resultado: " + result)
+	
+
 
 bot.polling()
